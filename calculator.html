@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #f3f4f6;
+    }
+
+    .calculator {
+      width: 320px;
+      background: #111827;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+      padding: 16px;
+    }
+
+    .display {
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+      padding: 14px;
+      font-size: 2rem;
+      text-align: right;
+      border: none;
+      border-radius: 10px;
+      background: #1f2937;
+      color: #f9fafb;
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 16px 0;
+      font-size: 1.1rem;
+      cursor: pointer;
+      background: #374151;
+      color: #f9fafb;
+      transition: filter 0.15s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.12);
+    }
+
+    .operator {
+      background: #f59e0b;
+      color: #111827;
+      font-weight: 700;
+    }
+
+    .equal {
+      background: #10b981;
+      color: #ecfeff;
+      font-weight: 700;
+      grid-column: span 2;
+    }
+
+    .clear {
+      background: #ef4444;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <main class="calculator" aria-label="Калькулятор">
+    <input id="display" class="display" type="text" value="0" readonly />
+
+    <div class="keys">
+      <button class="clear" data-action="clear">C</button>
+      <button data-action="delete">⌫</button>
+      <button class="operator" data-action="operator">÷</button>
+      <button class="operator" data-action="operator">×</button>
+
+      <button data-action="digit">7</button>
+      <button data-action="digit">8</button>
+      <button data-action="digit">9</button>
+      <button class="operator" data-action="operator">-</button>
+
+      <button data-action="digit">4</button>
+      <button data-action="digit">5</button>
+      <button data-action="digit">6</button>
+      <button class="operator" data-action="operator">+</button>
+
+      <button data-action="digit">1</button>
+      <button data-action="digit">2</button>
+      <button data-action="digit">3</button>
+      <button data-action="decimal">.</button>
+
+      <button class="zero" data-action="digit">0</button>
+      <button class="equal" data-action="calculate">=</button>
+    </div>
+  </main>
+
+  <script>
+    const display = document.getElementById('display');
+    const keys = document.querySelector('.keys');
+
+    let firstOperand = null;
+    let operator = null;
+    let shouldResetDisplay = false;
+
+    function updateDisplay(value) {
+      display.value = value;
+    }
+
+    function appendDigit(digit) {
+      if (display.value === '0' || shouldResetDisplay) {
+        updateDisplay(digit);
+        shouldResetDisplay = false;
+        return;
+      }
+      updateDisplay(display.value + digit);
+    }
+
+    function appendDecimal() {
+      if (shouldResetDisplay) {
+        updateDisplay('0.');
+        shouldResetDisplay = false;
+        return;
+      }
+      if (!display.value.includes('.')) {
+        updateDisplay(display.value + '.');
+      }
+    }
+
+    function chooseOperator(nextOperator) {
+      const inputValue = Number(display.value);
+
+      if (operator && !shouldResetDisplay) {
+        const result = calculate(firstOperand, inputValue, operator);
+        updateDisplay(String(result));
+        firstOperand = result;
+      } else {
+        firstOperand = inputValue;
+      }
+
+      operator = nextOperator;
+      shouldResetDisplay = true;
+    }
+
+    function clearCalculator() {
+      updateDisplay('0');
+      firstOperand = null;
+      operator = null;
+      shouldResetDisplay = false;
+    }
+
+    function deleteLastChar() {
+      if (shouldResetDisplay) return;
+      if (display.value.length <= 1) {
+        updateDisplay('0');
+      } else {
+        updateDisplay(display.value.slice(0, -1));
+      }
+    }
+
+    function calculate(a, b, operation) {
+      switch (operation) {
+        case '+':
+          return a + b;
+        case '-':
+          return a - b;
+        case '×':
+          return a * b;
+        case '÷':
+          return b === 0 ? 'Ошибка' : a / b;
+        default:
+          return b;
+      }
+    }
+
+    function performCalculation() {
+      if (operator === null || shouldResetDisplay) return;
+
+      const secondOperand = Number(display.value);
+      const result = calculate(firstOperand, secondOperand, operator);
+      updateDisplay(String(result));
+
+      firstOperand = result === 'Ошибка' ? null : result;
+      operator = null;
+      shouldResetDisplay = true;
+    }
+
+    keys.addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button) return;
+
+      const action = button.dataset.action;
+      const value = button.textContent;
+
+      switch (action) {
+        case 'digit':
+          appendDigit(value);
+          break;
+        case 'decimal':
+          appendDecimal();
+          break;
+        case 'operator':
+          chooseOperator(value);
+          break;
+        case 'calculate':
+          performCalculation();
+          break;
+        case 'clear':
+          clearCalculator();
+          break;
+        case 'delete':
+          deleteLastChar();
+          break;
+        default:
+          break;
+      }
+    });
+  </script>
+</body>
+</html>
