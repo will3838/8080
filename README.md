@@ -18,13 +18,16 @@
 ```text
 .
 ├── bot.py
+codex/create-telegram-bot-with-long-polling-xil2gc
 ├── START_BOT.bat
+main
 ├── requirements.txt
 ├── .env.example
 ├── README.md
 └── logs/
 ```
 
+codex/create-telegram-bot-with-long-polling-xil2gc
 ## Запуск на Windows в один клик
 
 1. Распакуйте ZIP с проектом в любую папку.
@@ -44,6 +47,8 @@
 > Важно: скрипт использует WinGet для установки Python. После установки Python команда может стать доступной только в новом окне консоли — тогда скрипт подскажет перезапустить `START_BOT.bat`.
 
 ## Ручная установка и запуск
+## Установка и запуск
+main
 
 ### 1) Создайте и активируйте виртуальное окружение
 
