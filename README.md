@@ -1,3 +1,4 @@
+codex/create-telegram-bot-with-long-polling-f8zdnd
 # Telegram bot (Python, long polling)
 
 Local Telegram bot project with one-click Windows startup and provably-fair roulette.
@@ -21,9 +22,28 @@ Local Telegram bot project with one-click Windows startup and provably-fair roul
 
 ## Project structure
 
+# Telegram-бот на Python (Long Polling)
+
+Минимальный проект Telegram-бота для локального запуска на ПК.
+
+## Что умеет бот
+
+- Обрабатывает команду `/help` и отвечает строго:
+  - `автор @HATE_death_ME`
+- Обрабатывает текстовое сообщение **ровно** `хелп` (только в нижнем регистре, без пробелов) и отвечает так же, как `/help`.
+- Работает в личных чатах и в группах.
+- Использует **long polling** (без webhook).
+- Логирует каждое входящее сообщение:
+  - в консоль
+  - в файл `logs/bot.log`
+
+## Структура проекта
+main
+
 ```text
 .
 ├── bot.py
+codex/create-telegram-bot-with-long-polling-f8zdnd
 ├── loot_table.py
 ├── fairness.py
 ├── roulette_animation.py
@@ -63,30 +83,81 @@ If Python was just installed and not visible in current PATH session, script ask
 
 **Linux/macOS**
 
+codex/create-telegram-bot-with-long-polling-xil2gc
+├── START_BOT.bat
+main
+├── requirements.txt
+├── .env.example
+├── README.md
+└── logs/
+```
+
+codex/create-telegram-bot-with-long-polling-xil2gc
+## Запуск на Windows в один клик
+
+1. Распакуйте ZIP с проектом в любую папку.
+2. Откройте папку проекта и запустите `START_BOT.bat` двойным кликом.
+3. Скрипт автоматически:
+   - проверит Python (`py`, затем `python`),
+   - при необходимости попробует установить Python через **WinGet**,
+   - создаст `.venv`, обновит `pip` и установит зависимости,
+   - создаст `logs/` (если папки нет),
+   - если `.env` отсутствует — скопирует `.env.example` в `.env`.
+4. Если `.env` не было, скрипт откроет файл в Notepad:
+   - вставьте токен в строку `TELEGRAM_BOT_TOKEN=...`,
+   - сохраните файл,
+   - закройте Notepad.
+5. После этого бот запустится автоматически.
+
+> Важно: скрипт использует WinGet для установки Python. После установки Python команда может стать доступной только в новом окне консоли — тогда скрипт подскажет перезапустить `START_BOT.bat`.
+
+## Ручная установка и запуск
+## Установка и запуск
+main
+
+### 1) Создайте и активируйте виртуальное окружение
+
+#### Linux / macOS
+main
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
 **Windows (PowerShell)**
+
+#### Windows (PowerShell)
+main
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
 ### 2) Install dependencies
+
+### 2) Установите зависимости
+main
 
 ```bash
 pip install -r requirements.txt
 ```
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
 ### 3) Create `.env`
+### 3) Создайте `.env` из шаблона
+
+#### Linux / macOS
+main
 
 ```bash
 cp .env.example .env
 ```
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
 Put your token in `.env`:
 
 ```env
@@ -100,10 +171,26 @@ TELEGRAM_BOT_TOKEN=your_bot_token_here
 
 ### 5) Start bot
 
+#### Windows (PowerShell)
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Откройте файл `.env` и вставьте токен вашего бота:
+
+```env
+TELEGRAM_BOT_TOKEN=ваш_токен_бота
+```
+
+### 4) Запустите бота
+ main
+
 ```bash
 python bot.py
 ```
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
 ## Excel format: `data/items.xlsx`
 
 Use first worksheet. Columns are strict:
@@ -145,3 +232,22 @@ For each spin:
 `/fair` shows current commit and current user nonce.
 `/reveal_seed` reveals current `server_seed`, then bot generates new `server_seed` and commit.
 Nonce counters are kept (not reset) by design.
+
+После запуска бот начнёт получать обновления через long polling.
+
+## Логирование
+
+Логи пишутся одновременно:
+
+- в консоль
+- в файл `logs/bot.log`
+
+Для каждого входящего сообщения фиксируются:
+
+- дата/время
+- `chat_id`
+- `user_id` (если есть)
+- `username` (если есть)
+- текст сообщения
+- действие (`handled_help_command`, `handled_help_text`, `ignored`)
+ main

@@ -1,3 +1,4 @@
+codex/create-telegram-bot-with-long-polling-f8zdnd
 from __future__ import annotations
 
 import asyncio
@@ -46,6 +47,20 @@ STATE_LOCK = asyncio.Lock()
 
 def setup_logging() -> None:
     logs_dir = BASE_DIR / "logs"
+import logging
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+
+HELP_TEXT = "автор @HATE_death_ME"
+
+
+def setup_logging() -> None:
+    logs_dir = Path("logs")
+main
     logs_dir.mkdir(parents=True, exist_ok=True)
 
     formatter = logging.Formatter(
@@ -53,6 +68,7 @@ def setup_logging() -> None:
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
     root = logging.getLogger()
     root.setLevel(logging.INFO)
     root.handlers.clear()
@@ -60,9 +76,18 @@ def setup_logging() -> None:
     console = logging.StreamHandler()
     console.setFormatter(formatter)
 
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    root_logger.handlers.clear()
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+main
+
     file_handler = logging.FileHandler(logs_dir / "bot.log", encoding="utf-8")
     file_handler.setFormatter(formatter)
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
     root.addHandler(console)
     root.addHandler(file_handler)
 
@@ -71,6 +96,17 @@ def log_incoming(update: Update, action: str) -> None:
     message = update.effective_message
     chat = update.effective_chat
     user = update.effective_user
+
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+
+
+def log_update(update: Update, action: str) -> None:
+    message = update.effective_message
+    chat = update.effective_chat
+    user = update.effective_user
+
+main
     logging.info(
         "incoming_message | chat_id=%s | user_id=%s | username=%s | text=%r | action=%s",
         chat.id if chat else None,
@@ -81,6 +117,7 @@ def log_incoming(update: Update, action: str) -> None:
     )
 
 
+codex/create-telegram-bot-with-long-polling-f8zdnd
 def log_spin(
     update: Update,
     trigger: str,
@@ -306,6 +343,21 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     log_incoming(update, "ignored")
 
+async def handle_help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.effective_message.reply_text(HELP_TEXT)
+    log_update(update, "handled_help_command")
+
+
+async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.effective_message
+    if message and message.text == "хелп":
+        await message.reply_text(HELP_TEXT)
+        log_update(update, "handled_help_text")
+        return
+
+    log_update(update, "ignored")
+main
+
 
 def get_token() -> str:
     load_dotenv()
@@ -317,6 +369,7 @@ def get_token() -> str:
 
 def main() -> None:
     setup_logging()
+codex/create-telegram-bot-with-long-polling-f8zdnd
     ensure_required_files()
     state = build_state()
     ensure_animation(state)
@@ -331,6 +384,14 @@ def main() -> None:
     app.add_handler(CommandHandler("fair", handle_fair))
     app.add_handler(CommandHandler("reveal_seed", handle_reveal_seed))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+
+    token = get_token()
+
+    app = Application.builder().token(token).build()
+
+    app.add_handler(CommandHandler("help", handle_help_command))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
+main
 
     logging.info("Bot started with long polling")
     app.run_polling(allowed_updates=Update.ALL_TYPES)
